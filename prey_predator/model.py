@@ -92,9 +92,26 @@ class WolfSheep(Model):
 
         # Create sheep:
         # ... to be completed
+        for i in range(self.initial_sheep):
 
+            # Add the agent to a random grid cell
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+                        
+            a = Sheep(i, (x, y), self,  moore=True )
+            self.schedule.add(a)
+
+            
         # Create wolves
         # ... to be completed
+        for i in range(self.initial_wolves):
+
+            # Add the agent to a random grid cell
+            x = self.random.randrange(self.grid.width)
+            y = self.random.randrange(self.grid.height)
+                        
+            a = Wolf(i, (x, y), self,  moore=True )
+            self.schedule.add(a)
 
         # Create grass patches
         # ... to be completed
@@ -110,4 +127,6 @@ class WolfSheep(Model):
     def run_model(self, step_count=200):
 
         # ... to be completed
+        for _ in range(step_count):
+            self.step()
 

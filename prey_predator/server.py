@@ -13,12 +13,27 @@ def wolf_sheep_portrayal(agent):
     portrayal = {}
 
     if type(agent) is Sheep:
+        portrayal = {"Shape": "circle",
+                 "Filled": "true",
+                 "Layer": 1,
+                 "Color": "#666666",
+                 "r": 0.5}
         # ... to be completed
 
     elif type(agent) is Wolf:
+        portrayal = {"Shape": "circle",
+                 "Filled": "true",
+                 "Layer": 1,
+                 "Color": "#AA0000",
+                 "r": 0.5}
         # ... to be completed
 
     elif type(agent) is GrassPatch:
+        portrayal = {"Shape": "square",
+                 "Filled": "true",
+                 "Layer": 0,
+                 "Color": "green",
+                 "r": 0.5}
         # ... to be completed
 
     return portrayal

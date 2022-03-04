@@ -14,7 +14,7 @@ class Sheep(RandomWalker):
     def __init__(self, unique_id, pos, model, moore, energy=None):
         super().__init__(unique_id, pos, model, moore=moore)
         self.energy = energy
-
+        
     def step(self):
         """
         A model step. Move, then eat grass and reproduce.
@@ -56,4 +56,5 @@ class GrassPatch(Agent):
         # ... to be completed
 
     def step(self):
+        pass
         # ... to be completed
