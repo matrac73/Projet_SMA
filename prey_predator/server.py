@@ -59,7 +59,7 @@ chart_energy_element = ChartModule(
 
 model_params = {
     "grass": UserSettableParameter("checkbox", "grass", value=True),
-    "starting_grass_prob":UserSettableParameter("slider", "starting_grass_prob",value=0.5, min_value=0.1, max_value=1.0, step=0.05),
+    "starting_grass_prob":UserSettableParameter("slider", "starting_grass_prob",value=0.3, min_value=0.1, max_value=1.0, step=0.05),
     "initial_sheep" :UserSettableParameter("slider", "initial_sheep", value=40,  min_value=1, max_value=100, step=1),
     "initial_wolves" :UserSettableParameter("slider", "initial_wolves", value=20,  min_value=1, max_value=100, step=1),
     "initial_sheep_energy" :UserSettableParameter("slider", "initial_sheep_energy", value=30,  min_value=1, max_value=100, step=1),
