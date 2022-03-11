@@ -47,10 +47,13 @@ class WolfSheep(Model):
         width=20,
         initial_sheep=100,
         initial_wolves=50,
+        initial_sheep_energy=40,
+        initial_wolves_energy=40,
         sheep_reproduce=0.04,
         wolf_reproduce=0.05,
         wolf_gain_from_food=20,
         grass=False,
+        starting_grass_prob=0.5,
         grass_regrowth_time=30,
         sheep_gain_from_food=4,
     ):
@@ -74,10 +77,13 @@ class WolfSheep(Model):
         self.width = width
         self.initial_sheep = initial_sheep
         self.initial_wolves = initial_wolves
+        self.initial_sheep_energy = initial_sheep_energy
+        self.initial_wolves_energy = initial_wolves_energy
         self.sheep_reproduce = sheep_reproduce
         self.wolf_reproduce = wolf_reproduce
         self.wolf_gain_from_food = wolf_gain_from_food
         self.grass = grass
+        self.starting_grass_prob = starting_grass_prob
         self.grass_regrowth_time = grass_regrowth_time
         self.sheep_gain_from_food = sheep_gain_from_food
 
@@ -87,6 +93,7 @@ class WolfSheep(Model):
             {
                 "Wolves": lambda m: m.schedule.get_breed_count(Wolf),
                 "Sheep": lambda m: m.schedule.get_breed_count(Sheep),
+                "Grass Energy": lambda m:  m.schedule.get_fully_grown_grass()*self.sheep_gain_from_food,
             }
         )
 
@@ -98,7 +105,7 @@ class WolfSheep(Model):
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
                         
-            a = Sheep(i, (x, y), self,  moore=True )
+            a = Sheep(self.next_id(), (x, y), self,  moore=True, energy=self.initial_sheep_energy )
             self.schedule.add(a)
 
             
@@ -110,11 +117,21 @@ class WolfSheep(Model):
             x = self.random.randrange(self.grid.width)
             y = self.random.randrange(self.grid.height)
                         
-            a = Wolf(i, (x, y), self,  moore=True )
+            a = Wolf(self.next_id(), (x, y), self,  moore=True, energy=self.initial_wolves_energy )
             self.schedule.add(a)
 
         # Create grass patches
         # ... to be completed
+        if self.grass:
+            for i in range(self.grid.width):
+                for j in range(self.grid.height):
+                    if self.random.random() < self.starting_grass_prob:
+                        a = GrassPatch(self.next_id(), (i, j), self, fully_grown=True, countdown=0)
+                    else:
+                        a = GrassPatch(self.next_id(), (i, j), self, fully_grown=False, countdown=self.random.randint(0,self.grass_regrowth_time))
+                    self.schedule.add(a)
+                
+        
 
     def step(self):
         self.schedule.step()
@@ -124,9 +141,81 @@ class WolfSheep(Model):
 
         # ... to be completed
 
+        # eat each other
+
+        #for i in self.grid.width:
+        #    for j in self.grid.height:
+        #        cellmates = self.model.grid.get_cell_list_contents([(i,j)])
+        #        for agent in cellmates:
+        #            if isinstance(agent, Wolf):
+
+        # eliminate the ones without energy
+        for agent in self.schedule.agents:
+            if isinstance(agent, Sheep) or isinstance(agent, Wolf):
+                if agent.energy <= 0:
+                    self.schedule.remove(agent)
+                    self.grid.remove_agent(agent)
+            
+
+        # breed wolfs and sheeps
+
+        for agent in self.schedule.agents:
+            if isinstance(agent, Sheep):
+                if self.random.random() < self.sheep_reproduce:
+                    possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
+                    pos = self.random.choice(possible_pos)
+                    energy_used = agent.energy // 2 
+                    agent.energy -= energy_used        
+                    a = Sheep(self.next_id(), pos, self,  moore=True, energy = energy_used )
+                    
+                    self.schedule.add(a)
+
+            if isinstance(agent, Wolf):
+                if self.random.random() < self.wolf_reproduce:
+                    possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
+                    pos = self.random.choice(possible_pos)
+                    energy_used = agent.energy // 2 
+                    agent.energy -= energy_used
+                    a = Wolf(self.next_id(), pos, self,  moore=True, energy=energy_used)
+                    
+                    self.schedule.add(a)
+            if isinstance(agent, GrassPatch):
+                if agent.countdown == 0:
+                    agent.fully_grown = True
+
+        for agent in self.schedule.agents:
+            if isinstance(agent, Sheep):
+                cellmates = self.grid.get_cell_list_contents([agent.pos])
+                for cellmate in cellmates:
+                    if isinstance(cellmate, GrassPatch):
+                        if cellmate.fully_grown:
+                            cellmate.fully_grown = False
+                            cellmate.countdown = self.grass_regrowth_time
+                            agent.energy += self.sheep_gain_from_food
+
+        for agent in self.schedule.agents:
+            if isinstance(agent, Wolf):
+                cellmates = self.grid.get_cell_list_contents([agent.pos])
+                for cellmate in cellmates:
+                    if isinstance(cellmate, Sheep):    
+                        agent.energy += cellmate.energy # we are not using wolf gain from food
+                        self.schedule.remove(cellmate)
+                        self.grid.remove_agent(cellmate)
+
+        
+                
+            if isinstance(agent, Wolf):
+                if self.random.random() < self.wolf_reproduce:
+                    possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
+                    pos = self.random.choice(possible_pos)
+                    energy_used = agent.energy // 2 
+                    agent.energy -= energy_used
+                    a = Wolf(self.next_id(), pos, self,  moore=True, energy=energy_used)
+                    
+                    self.schedule.add(a)
+                    
     def run_model(self, step_count=200):
 
         # ... to be completed
         for _ in range(step_count):
             self.step()
-

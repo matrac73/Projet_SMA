@@ -2,6 +2,8 @@ from collections import defaultdict
 
 from mesa.time import RandomActivation
 
+from prey_predator.agents import GrassPatch
+
 
 class RandomActivationByBreed(RandomActivation):
     """
@@ -73,3 +75,14 @@ class RandomActivationByBreed(RandomActivation):
         Returns the current number of agents of certain breed in the queue.
         """
         return len(self.agents_by_breed[breed_class].values())
+
+    def get_fully_grown_grass(self):
+        """
+        Returns the grown grass
+        """
+        total = 0
+        for grass in self.agents_by_breed[GrassPatch].values():
+            if grass.fully_grown: total += 1
+
+        return total
+        

@@ -1,3 +1,5 @@
+from itertools import count
+from tkinter import S
 from mesa import Agent
 from prey_predator.random_walk import RandomWalker
 
@@ -20,6 +22,8 @@ class Sheep(RandomWalker):
         A model step. Move, then eat grass and reproduce.
         """
         self.random_move()
+        if self.model.grass:
+            self.energy -= 1
         # ... to be completed
 
 
@@ -36,8 +40,12 @@ class Wolf(RandomWalker):
 
     def step(self):
         self.random_move()
+        self.energy -= 1
+
         # ... to be completed
 
+    def eat(self, cellmate):
+        pass
 
 class GrassPatch(Agent):
     """
@@ -51,10 +59,14 @@ class GrassPatch(Agent):
         Args:
             grown: (boolean) Whether the patch of grass is fully grown or not
             countdown: Time for the patch of grass to be fully grown again
+            growth_time
         """
         super().__init__(unique_id, model)
-        # ... to be completed
-
+        self.pos = pos
+        self.model.grid.place_agent(self, self.pos)
+        self.fully_grown = fully_grown
+        self.countdown = countdown
+        
     def step(self):
-        pass
-        # ... to be completed
+        if self.countdown > 0:
+            self.countdown -= 1
