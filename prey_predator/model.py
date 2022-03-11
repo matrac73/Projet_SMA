@@ -53,7 +53,7 @@ class WolfSheep(Model):
         wolf_reproduce=0.05,
         wolf_gain_from_food=20,
         grass=False,
-        starting_grass_prob=0.5,
+        starting_grass_prob=0.3,
         grass_regrowth_time=30,
         sheep_gain_from_food=4,
     ):
@@ -98,7 +98,6 @@ class WolfSheep(Model):
         )
 
         # Create sheep:
-        # ... to be completed
         for i in range(self.initial_sheep):
 
             # Add the agent to a random grid cell
@@ -110,7 +109,6 @@ class WolfSheep(Model):
 
             
         # Create wolves
-        # ... to be completed
         for i in range(self.initial_wolves):
 
             # Add the agent to a random grid cell
@@ -121,7 +119,6 @@ class WolfSheep(Model):
             self.schedule.add(a)
 
         # Create grass patches
-        # ... to be completed
         if self.grass:
             for i in range(self.grid.width):
                 for j in range(self.grid.height):
@@ -139,83 +136,49 @@ class WolfSheep(Model):
         # Collect data
         self.datacollector.collect(self)
 
-        # ... to be completed
-
-        # eat each other
-
-        #for i in self.grid.width:
-        #    for j in self.grid.height:
-        #        cellmates = self.model.grid.get_cell_list_contents([(i,j)])
-        #        for agent in cellmates:
-        #            if isinstance(agent, Wolf):
-
-        # eliminate the ones without energy
-        for agent in self.schedule.agents:
-            if isinstance(agent, Sheep) or isinstance(agent, Wolf):
-                if agent.energy <= 0:
-                    self.schedule.remove(agent)
-                    self.grid.remove_agent(agent)
-            
-
-        # breed wolfs and sheeps
-
-        for agent in self.schedule.agents:
-            if isinstance(agent, Sheep):
-                if self.random.random() < self.sheep_reproduce:
-                    possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
-                    pos = self.random.choice(possible_pos)
-                    energy_used = agent.energy // 2 
-                    agent.energy -= energy_used        
-                    a = Sheep(self.next_id(), pos, self,  moore=True, energy = energy_used )
-                    
-                    self.schedule.add(a)
-
-            if isinstance(agent, Wolf):
-                if self.random.random() < self.wolf_reproduce:
-                    possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
-                    pos = self.random.choice(possible_pos)
-                    energy_used = agent.energy // 2 
-                    agent.energy -= energy_used
-                    a = Wolf(self.next_id(), pos, self,  moore=True, energy=energy_used)
-                    
-                    self.schedule.add(a)
-            if isinstance(agent, GrassPatch):
-                if agent.countdown == 0:
-                    agent.fully_grown = True
-
-        for agent in self.schedule.agents:
-            if isinstance(agent, Sheep):
-                cellmates = self.grid.get_cell_list_contents([agent.pos])
-                for cellmate in cellmates:
-                    if isinstance(cellmate, GrassPatch):
-                        if cellmate.fully_grown:
-                            cellmate.fully_grown = False
-                            cellmate.countdown = self.grass_regrowth_time
-                            agent.energy += self.sheep_gain_from_food
-
-        for agent in self.schedule.agents:
-            if isinstance(agent, Wolf):
-                cellmates = self.grid.get_cell_list_contents([agent.pos])
-                for cellmate in cellmates:
-                    if isinstance(cellmate, Sheep):    
-                        agent.energy += cellmate.energy # we are not using wolf gain from food
-                        self.schedule.remove(cellmate)
-                        self.grid.remove_agent(cellmate)
-
-        
-                
-            if isinstance(agent, Wolf):
-                if self.random.random() < self.wolf_reproduce:
-                    possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
-                    pos = self.random.choice(possible_pos)
-                    energy_used = agent.energy // 2 
-                    agent.energy -= energy_used
-                    a = Wolf(self.next_id(), pos, self,  moore=True, energy=energy_used)
-                    
-                    self.schedule.add(a)
                     
     def run_model(self, step_count=200):
 
         # ... to be completed
         for _ in range(step_count):
             self.step()
+
+    def eat_grass(self, sheep_agent):
+        """make the sheep_agent eat grass, if possible"""
+        cellmates = self.grid.get_cell_list_contents([sheep_agent.pos])
+        for cellmate in cellmates:
+            if isinstance(cellmate, GrassPatch):
+                if cellmate.fully_grown:
+                    cellmate.fully_grown = False
+                    cellmate.countdown = self.grass_regrowth_time
+                    sheep_agent.energy += self.sheep_gain_from_food
+
+    def eat_sheep(self, wolf_agent):
+        """make the wolf_agent eat one sheep, if possible"""
+        cellmates = self.grid.get_cell_list_contents([wolf_agent.pos])
+        for cellmate in cellmates:
+            if isinstance(cellmate, Sheep):    
+                #wolf_agent.energy += cellmate.energy # we are not using wolf gain from food
+                wolf_agent.energy += self.wolf_gain_from_food
+                self.grid.remove_agent(cellmate)
+                self.schedule.remove(cellmate)
+
+    def breed(self, agent):
+        """randomly breed the agent"""
+        if isinstance(agent, Sheep):
+            reproduce_chance = self.sheep_reproduce
+            agent_cls = Sheep
+        elif isinstance(agent, Wolf):
+            reproduce_chance = self.wolf_reproduce
+            agent_cls = Wolf
+
+        if self.random.random() < reproduce_chance:
+            possible_pos = self.grid.get_neighborhood(agent.pos, agent.moore, True)
+            pos = self.random.choice(possible_pos)
+            # split the energy between the two agent, must have energy to spare
+            if agent.energy > 1:
+                energy_used = agent.energy // 2 
+                agent.energy -= energy_used        
+                a = agent_cls(self.next_id(), pos, self,  moore=True, energy = energy_used )
+            
+                self.schedule.add(a)

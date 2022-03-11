@@ -22,9 +22,14 @@ class Sheep(RandomWalker):
         A model step. Move, then eat grass and reproduce.
         """
         self.random_move()
+        self.model.eat_grass(self)
+        self.model.breed(self)
+        
         if self.model.grass:
-            self.energy -= 1
-        # ... to be completed
+            self.energy -= 1        
+            if self.energy <= 0:
+                self.model.grid.remove_agent(self)
+                self.model.schedule.remove(self)
 
 
 class Wolf(RandomWalker):
@@ -40,12 +45,13 @@ class Wolf(RandomWalker):
 
     def step(self):
         self.random_move()
+        self.model.eat_sheep(self)
+        self.model.breed(self)
         self.energy -= 1
+        if self.energy <= 0:
+            self.model.grid.remove_agent(self)
+            self.model.schedule.remove(self)
 
-        # ... to be completed
-
-    def eat(self, cellmate):
-        pass
 
 class GrassPatch(Agent):
     """
@@ -70,3 +76,5 @@ class GrassPatch(Agent):
     def step(self):
         if self.countdown > 0:
             self.countdown -= 1
+        if self.countdown == 0:
+            self.fully_grown = True

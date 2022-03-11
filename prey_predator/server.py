@@ -64,11 +64,11 @@ model_params = {
     "initial_wolves" :UserSettableParameter("slider", "initial_wolves", value=20,  min_value=1, max_value=100, step=1),
     "initial_sheep_energy" :UserSettableParameter("slider", "initial_sheep_energy", value=30,  min_value=1, max_value=100, step=1),
     "initial_wolves_energy" :UserSettableParameter("slider", "initial_wolves_energy", value=30,  min_value=1, max_value=100, step=1),
-    "sheep_reproduce" :UserSettableParameter("slider", "sheep_reproduce",value=0.1, min_value=0.00, max_value=0.2, step=0.01),
-    "wolf_reproduce" :UserSettableParameter("slider", "wolf_reproduce", value=0.02,  min_value=0.00, max_value=0.1, step=0.01),
-    #"wolf_gain_from_food" :UserSettableParameter("slider", "wolf_gain_from_food", value=20,  min_value=1, max_value=100, step=1),
-    "grass_regrowth_time" :UserSettableParameter("slider", "grass_regrowth_time", value=30,  min_value=1, max_value=100, step=1),
-    "sheep_gain_from_food" :UserSettableParameter("slider", "sheep_gain_from_food", value=8,  min_value=1, max_value=100, step=1),
+    "sheep_reproduce" :UserSettableParameter("slider", "sheep_reproduce",value=0.15, min_value=0.00, max_value=0.2, step=0.01),
+    "wolf_reproduce" :UserSettableParameter("slider", "wolf_reproduce", value=0.05,  min_value=0.00, max_value=0.1, step=0.01),
+    "wolf_gain_from_food" :UserSettableParameter("slider", "wolf_gain_from_food", value=10,  min_value=1, max_value=100, step=1),
+    "grass_regrowth_time" :UserSettableParameter("slider", "grass_regrowth_time", value=40,  min_value=1, max_value=100, step=1),
+    "sheep_gain_from_food" :UserSettableParameter("slider", "sheep_gain_from_food", value=12,  min_value=1, max_value=100, step=1),
 }
 
 server = ModularServer(
