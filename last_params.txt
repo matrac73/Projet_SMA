@@ -1,0 +1,13 @@
+starting_grass_prob=0.3
+initial_sheep= 40
+initial_wolves=20
+initial_sheep_energy = 30
+initial_sheep_energy = 30
+sheep_reproduce=0.15
+wolf.reproduce=0.05
+wolf_gain_from_food=10
+grass_regrowth_time=40
+sheep_gain_from_food=12
+
+children -> split energy between the two
+wolf eat all sheeps from place, and gain fixed energy each time

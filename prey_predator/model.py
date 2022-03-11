@@ -143,25 +143,19 @@ class WolfSheep(Model):
         for _ in range(step_count):
             self.step()
 
-    def eat_grass(self, sheep_agent):
+    def eat_grass(self, sheep_agent, grass_agent):
         """make the sheep_agent eat grass, if possible"""
-        cellmates = self.grid.get_cell_list_contents([sheep_agent.pos])
-        for cellmate in cellmates:
-            if isinstance(cellmate, GrassPatch):
-                if cellmate.fully_grown:
-                    cellmate.fully_grown = False
-                    cellmate.countdown = self.grass_regrowth_time
-                    sheep_agent.energy += self.sheep_gain_from_food
+        if grass_agent.fully_grown:
+            grass_agent.fully_grown = False
+            grass_agent.countdown = self.grass_regrowth_time
+            sheep_agent.energy += self.sheep_gain_from_food
 
-    def eat_sheep(self, wolf_agent):
-        """make the wolf_agent eat one sheep, if possible"""
-        cellmates = self.grid.get_cell_list_contents([wolf_agent.pos])
-        for cellmate in cellmates:
-            if isinstance(cellmate, Sheep):    
-                #wolf_agent.energy += cellmate.energy # we are not using wolf gain from food
-                wolf_agent.energy += self.wolf_gain_from_food
-                self.grid.remove_agent(cellmate)
-                self.schedule.remove(cellmate)
+    def eat_sheep(self, wolf_agent, sheep_agent):
+        """make the wolf_agent eat a sheep, if possible"""
+        #wolf_agent.energy += cellmate.energy # we are not using wolf gain from food
+        wolf_agent.energy += self.wolf_gain_from_food
+        self.grid.remove_agent(sheep_agent)
+        self.schedule.remove(sheep_agent)
 
     def breed(self, agent):
         """randomly breed the agent"""
